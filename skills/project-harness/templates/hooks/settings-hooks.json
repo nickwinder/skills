@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/harness-session-start.sh",
+            "timeout": 10,
+            "statusMessage": "Detecting project harness..."
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/verify-task-completion.sh",
+            "timeout": 10,
+            "statusMessage": "Checking task verification..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-stale-tasks.sh",
+            "timeout": 10,
+            "statusMessage": "Checking for stale tasks..."
+          }
+        ]
+      }
+    ]
+  }
+}
