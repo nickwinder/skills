@@ -2,7 +2,7 @@
 name: {{NAME}}
 command: {{COMMAND}}
 scope: {{SCOPE}}
-manual: false
+worktree-safe: true
 ---
 
 # {{NAME}}
@@ -24,6 +24,15 @@ manual: false
 - Exit code 0
 -
 
-## Failure Response
-<!-- What should an agent do when this verification fails? -->
-Read the failure output. Fix the code, not the test (unless the test expectation is wrong due to an intentional behavior change).
+## Failure Remediation
+<!-- IMPORTANT: Be specific. Agents read this section when the check fails.
+     Generic advice ("fix the errors") is not useful. Describe:
+     - What the failure output typically looks like
+     - Where to look first
+     - The most common causes in this codebase
+     - The exact fix pattern for those causes -->
+
+## Isolation Requirements
+<!-- Describe any per-worktree setup this check needs: env vars, ports,
+     databases, running services. If none, write "None — runs without
+     any external dependencies." -->

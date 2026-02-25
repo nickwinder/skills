@@ -19,7 +19,7 @@
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/verify-task-completion.sh",
             "timeout": 10,
-            "statusMessage": "Checking task verification..."
+            "statusMessage": "Checking verification and knowledge capture..."
           }
         ]
       }
@@ -29,9 +29,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-stale-tasks.sh",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-stale-knowledge.sh",
             "timeout": 10,
-            "statusMessage": "Checking for stale tasks..."
+            "statusMessage": "Checking for uncommitted knowledge..."
           }
         ]
       }

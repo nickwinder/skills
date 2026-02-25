@@ -1,22 +1,21 @@
 #!/bin/bash
 # Hook: TaskCompleted
-# Reads the completed task's verified-by field and reminds the agent
-# to run verification before marking done.
-# Exit 2 = block completion, Exit 0 = allow
+# Reminds agent to verify work and capture knowledge before marking complete.
+# Exit 0 always (reminder only).
 
 INPUT=$(cat)
-TASK_SUBJECT=$(echo "$INPUT" | jq -r '.task_subject // empty')
-TASK_DESCRIPTION=$(echo "$INPUT" | jq -r '.task_description // empty')
 CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
 
-DOCS_TASKS_DIR="$CWD/docs/tasks"
+DOCS_DIR="$CWD/docs"
 
-# If no harness tasks directory, allow completion silently
-if [ ! -d "$DOCS_TASKS_DIR" ]; then
+# Only activate if this project has a harness
+if [ ! -d "$DOCS_DIR/verification" ] && [ ! -d "$DOCS_DIR/architecture" ]; then
   exit 0
 fi
 
-# Search for task files with verified-by fields that haven't been checked
-# This is a lightweight reminder — the agent-type hook below does the real enforcement
-echo "Reminder: If this task has a corresponding file in docs/tasks/, ensure its verified-by checks have been run and its frontmatter status is updated to done."
+echo "Before marking this complete:"
+echo "  1. Run applicable verification types from docs/verification/ within your worktree"
+echo "  2. If you discovered a reusable pattern, document it in docs/patterns/"
+echo "  3. If you made a significant architectural decision, create an ADR in docs/decisions/"
+echo "  4. If you noticed something out of scope that needs fixing, drop a file in docs/backlog/"
 exit 0

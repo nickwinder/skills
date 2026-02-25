@@ -1,51 +1,36 @@
 ## Project Harness
 
-This project uses a structured harness for tracking design, tasks, and verification.
+This project uses a knowledge-base harness for structured AI-agent development.
 
-### Directory Layout
+### Quick Start
 
-| Directory | Committed | Purpose |
-|-----------|-----------|---------|
-| `docs/design-plans/` | Yes | Design specifications (static, immutable after approval) |
-| `docs/tasks/` | Yes | Work items with lifecycle state in frontmatter |
-| `docs/verification/` | Yes | One file per verification type the project supports |
-| `docs/implementation-plans/` | No (.gitignored) | Ephemeral phase-by-phase working documents |
-
-### Task Lifecycle
-
-Tasks in `docs/tasks/` track all work. Each task has YAML frontmatter:
-
-```yaml
----
-status: backlog | in-progress | done
-design: YYYY-MM-DD-design-plan-name  # optional, links to design plan
-created: YYYY-MM-DD
-verified-by:
-  - verification-type-name
-  - another-type
----
+```
+# Run:   <HOW_TO_RUN>
+# Test:  <HOW_TO_TEST>
+# New worktree:
+#   git worktree add -b <branch> .worktrees/<branch>
+#   then follow docs/architecture/worktree-isolation.md
 ```
 
-**Status values:** `backlog` (not started) -> `in-progress` (actively being worked) -> `done` (all verification passed)
+### Knowledge Base
 
-A design plan is considered complete when all tasks referencing it are `done`.
+| Path | Purpose |
+|------|---------|
+| `docs/architecture/constraints.md` | Rules that must not be broken |
+| `docs/architecture/beliefs.md` | Why the constraints exist |
+| `docs/architecture/worktree-isolation.md` | How to run in an isolated worktree |
+| `docs/decisions/` | Architecture Decision Records |
+| `docs/patterns/` | Reusable patterns discovered during development |
+| `docs/verification/` | How to verify work is correct |
+| `docs/backlog/` | Deferred work items noticed incidentally — check here for available cleanup work |
 
-### Verification
+### How We Work
 
-Before marking a task `done`, read each file listed in the task's `verified-by` field from `docs/verification/`. Each file documents what to run, what success looks like, and what to do on failure.
+All work follows 6 phases — read `docs/workflow/<phase>.md` for each:
 
-### Working With This Harness
-
-**Starting work:**
-1. Check `docs/tasks/` for `backlog` or `in-progress` items
-2. Read the linked design plan for context
-3. Read `docs/verification/` to understand available verification types
-
-**During work:**
-1. Update task status to `in-progress` in its frontmatter
-2. Implementation plans go in `docs/implementation-plans/` (not committed)
-
-**Completing work:**
-1. Run all verification types listed in the task's `verified-by` field
-2. Confirm all pass
-3. Update task status to `done` in its frontmatter
+1. **Explore** — load the knowledge base before touching code
+2. **Design** — document your approach, validate against constraints
+3. **Stress Test** — validate design in a fresh context
+4. **Implement** — work in an isolated worktree
+5. **Test** — all verification runs within the worktree
+6. **Review** — fresh context, diff only, checked against constraints
