@@ -1,8 +1,7 @@
 # Worktree Isolation
 
-All work happens in isolated git worktrees. Every agent must be able to run
-the full project — servers, tests, builds — without affecting any other agent
-working in a different worktree.
+Every worktree must be able to build, lint, test, and run the project in
+complete isolation. No worktree may depend on state produced by another.
 
 ## Why
 
@@ -23,52 +22,54 @@ All worktrees go in `.worktrees/`. Add this to `.gitignore`:
 .worktrees/
 ```
 
-## Port Allocation
+## Build, Lint, and Test Isolation
 
-Each worktree needs unique ports. Use index-based allocation:
+Most verification commands (build, lint, typecheck, unit tests) operate purely
+on source files and need no special isolation — they work correctly in any
+worktree by default.
+
+Document any exceptions here — for example, if the build writes to a shared
+output directory, or tests read from a shared fixture store.
+
+## Runtime Isolation
+
+If the project runs servers or connects to databases, each worktree needs its
+own runtime environment to avoid collisions.
+
+### Port Isolation
+
+If the project runs a dev server or other services, document the ports used and
+how to make them unique per worktree. A common strategy is index-based
+allocation:
 
 ```
-BASE_PORT=<your base port, e.g. 4000>
 WORKTREE_INDEX=<0 for main, 1 for first worktree, 2 for second, ...>
-
-APP_PORT  = BASE_PORT + (WORKTREE_INDEX × 10) + 0
-DB_PORT   = BASE_PORT + (WORKTREE_INDEX × 10) + 1
-CACHE_PORT = BASE_PORT + (WORKTREE_INDEX × 10) + 2
+PORT = BASE_PORT + (WORKTREE_INDEX × 10)
 ```
 
-Document the BASE_PORT your project uses here: `BASE_PORT=____`
+If no servers are involved, write: "Not applicable — no servers to isolate."
 
-## Database Isolation
+### Database Isolation
 
-Name databases by worktree index or branch name:
+If the project uses a database, document how to namespace it per worktree
+(e.g. separate database names, separate Docker volumes, or separate
+`COMPOSE_PROJECT_NAME` values).
 
-```
-main worktree:    myapp_db_0   (or myapp_db_main)
-first worktree:   myapp_db_1   (or myapp_db_<branch>)
-second worktree:  myapp_db_2
-```
+If no database is involved, write: "Not applicable — no database to isolate."
 
-If using Docker: use a per-worktree `COMPOSE_PROJECT_NAME` so volumes and
-containers are namespaced and don't collide.
+### Shared Services
+
+Some external services may be shared across worktrees (e.g. a backend API that
+all worktrees connect to). List these here and note that they do not need
+per-worktree isolation.
 
 ## Environment Configuration
 
-Commit a `.env.template` with placeholder values. Each worktree generates its
-own `.env` from the template. The `.env` file is gitignored.
-
-`.env.template` example:
-```
-APP_PORT={{APP_PORT}}
-DATABASE_URL=postgresql://user:pass@localhost:{{DB_PORT}}/myapp_{{WORKTREE_INDEX}}
-COMPOSE_PROJECT_NAME=myapp-{{WORKTREE_NAME}}
-```
-
-A setup script (or manual step) substitutes `{{...}}` values based on the
-worktree index before first use.
+If the project uses `.env` files, each worktree needs its own copy with the
+correct ports and database URLs. Document the setup process here.
 
 ## Verification Requirement
 
 Every verification type in `docs/verification/` must declare `worktree-safe: true`
-in its frontmatter. If a check requires shared infrastructure (e.g. a shared
-staging database), document the isolation strategy in its
-`## Isolation Requirements` section.
+in its frontmatter. If a check requires shared infrastructure, document the
+isolation strategy in its `## Isolation Requirements` section.

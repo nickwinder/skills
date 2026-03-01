@@ -84,7 +84,7 @@ chmod +x .claude/hooks/*.sh
 
 Then merge the hook configuration from `~/.claude/skills/project-harness/templates/hooks/settings-hooks.json` into the project's `.claude/settings.json`. If the file exists, merge the `hooks` key without overwriting existing hooks. If it doesn't exist, create it.
 
-### Step 5: Create architecture documents
+### Step 5: Create and populate architecture documents
 
 Copy from `~/.claude/skills/project-harness/templates/architecture/` to `docs/architecture/`:
 
@@ -94,9 +94,26 @@ cp ~/.claude/skills/project-harness/templates/architecture/beliefs.md docs/archi
 cp ~/.claude/skills/project-harness/templates/architecture/worktree-isolation.md docs/architecture/
 ```
 
-These files are rich templates with worked examples. Tell the user:
-- `constraints.md` and `beliefs.md` contain example content to illustrate the format — they should replace the examples with their own constraints and beliefs before starting work
-- `worktree-isolation.md` describes the isolation requirement and patterns — they should fill in the `BASE_PORT` and adapt the examples to their stack
+**Then populate them with real project content.** Do not leave the example/placeholder content. Read the project's existing documentation to extract actual constraints, beliefs, and isolation details:
+
+**Sources to inspect:**
+- `ARCHITECTURE.md` — look for invariants, rules, system structure, ports, databases
+- `AGENTS.md` / `CLAUDE.md` — look for coding conventions, tech stack, requirements
+- `README.md` — look for setup instructions, port numbers, dependencies
+- `package.json` / `Cargo.toml` / `pyproject.toml` — look for dependencies that imply constraints
+- `.env.example` / `.env.template` — look for port numbers, database URLs, service dependencies
+- `docker-compose.yml` / `Dockerfile` — look for service ports and database config
+
+**For `constraints.md`:** Replace all example content. Extract real constraints from the project's invariants, coding conventions, and architectural rules. Each constraint needs: the rule, a violation example, a correct pattern, and optionally a reference to the belief that explains why.
+
+**For `beliefs.md`:** Replace all example content. For each constraint (or group of related constraints), write the underlying belief: what is believed, why, and what trade-offs are accepted.
+
+**For `worktree-isolation.md`:** Document what a worktree needs to build, lint, test, and run in isolation. This includes:
+- **Port isolation** (if the project runs servers): which ports are used, which need to be unique per worktree, and an allocation strategy
+- **Database isolation** (if applicable): how to namespace databases per worktree
+- **Environment setup**: what `.env` or config changes are needed per worktree
+- **Shared vs per-worktree services**: which external services are shared and which must be isolated
+- If the project is purely a library with no servers or databases, state that no runtime isolation is needed — build/lint/test run on source files only.
 
 ### Step 6: Create decision and pattern templates
 
@@ -152,15 +169,32 @@ These documents are technology-agnostic. They do not need to be modified.
 
 Then ask the user to confirm, modify, or add to the list using AskUserQuestion. The user may want to rename types, change commands, or add types that weren't auto-detected (e.g., manual-review).
 
-For each confirmed type, copy the template from `~/.claude/skills/project-harness/templates/verification-type.md` and fill in the name, command, and scope. Pre-populate "When To Use" and "Success Criteria" based on what was discovered. Leave "Failure Remediation" and "Isolation Requirements" for the user to fill in — these are project-specific and cannot be auto-populated.
+For each confirmed type, copy the template from `~/.claude/skills/project-harness/templates/verification-type.md` and fill in the name, command, and scope. Pre-populate "When To Use" and "Success Criteria" based on what was discovered.
+
+**Then populate Failure Remediation and Isolation Requirements.** Do not leave these as placeholders. Read the project's config files to write specific, actionable remediation guidance:
+
+**Sources to inspect per verification type:**
+- **unit-tests:** Read test config (`vitest.config.*`, `jest.config.*`), test setup files, and 2-3 actual test files to understand mocking patterns, test helpers, and common assertion styles.
+- **typecheck:** Read `tsconfig.json` for strict mode flags, path aliases, and excluded directories. Note any custom type packages or path mappings that commonly cause issues.
+- **build:** Read build config (`vite.config.*`, `webpack.config.*`) for plugins, special loaders (e.g. Vanilla Extract), and workspace dependencies that must be built first.
+- **lint:** Read linter config (`.eslintrc.*`, `eslint.config.*`, `ruff.toml`) for custom rules and plugins. If no linter is configured yet, note this as a placeholder.
+- **e2e:** Read e2e config (`playwright.config.*`, `cypress.config.*`) for base URL, required services, and timeouts. If not yet configured, note this and list expected service requirements.
+
+**For each Failure Remediation section, include:**
+1. What the failure output typically looks like
+2. Where to look first (specific files/directories)
+3. The most common causes in this specific codebase
+4. The exact fix pattern for those causes
+
+**For Isolation Requirements:** State whether the check needs external services, databases, or specific ports. If it runs purely on source files, write "None — runs without any external dependencies."
 
 ### Step 9: Confirm setup
 
-List what was created. Remind the user of the two things they must do before starting work:
+List what was created. The architecture documents and verification remediation sections should already be populated with real project content from steps 5 and 8. Remind the user to:
 
-1. **Populate `docs/architecture/`** — replace the example content in `constraints.md` and `beliefs.md` with their project's actual rules and beliefs. Fill in `BASE_PORT` in `worktree-isolation.md` and adapt the isolation patterns to their stack.
+1. **Review `docs/architecture/`** — verify that the auto-populated constraints, beliefs, and worktree isolation details are accurate. Add any constraints or beliefs that were missed.
 
-2. **Fill in verification remediation** — for each verification type in `docs/verification/`, complete the `## Failure Remediation` section with specific guidance for this project. This is the most valuable thing an agent can read when a check fails.
+2. **Review `docs/verification/`** — verify that the auto-populated Failure Remediation sections are accurate and add any project-specific nuances that were missed.
 
 ## Artifact Formats
 
