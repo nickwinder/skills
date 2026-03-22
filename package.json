@@ -1,0 +1,23 @@
+{
+  "name": "@nickwinder/skills",
+  "version": "1.0.0",
+  "description": "Agent skills for PR review, acceptance criteria, optimization experiments, and project scaffolding",
+  "keywords": [
+    "agent-skills",
+    "skills",
+    "claude-code",
+    "ai-agent",
+    "pr-review",
+    "acceptance-criteria",
+    "ratchet",
+    "optimization"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nickwinder/skills.git"
+  },
+  "files": [
+    "skills"
+  ]
+}

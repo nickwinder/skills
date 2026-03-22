@@ -27,6 +27,14 @@ The harness is a convention-over-configuration filesystem of committed documents
 | `docs/verification/` | How to verify work is correct, with failure remediation |
 | `docs/workflow/` | Six-phase working methodology — how agents use the knowledge base |
 
+## Resolving Template Paths
+
+This skill includes a `templates/` directory alongside this SKILL.md file. Before executing, locate the templates directory by finding this skill's installation path. It may be at:
+- `~/.claude/skills/project-harness/templates/` (global install)
+- `.claude/skills/project-harness/templates/` (project install)
+
+Use whichever location exists. All `templates/` references below are relative to the skill's installation directory.
+
 ## Scaffolding Steps
 
 When the user invokes this skill, execute the following steps in the target project directory.
